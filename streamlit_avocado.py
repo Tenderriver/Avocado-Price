@@ -417,208 +417,105 @@ elif choice=="Content":
                                 ['','organic','conventional'])
         type=type()
 
-
-        def model():
-            return st.selectbox("Model:",
-                        ['','facebook prophet','holtwinters'])
-        model=model()
-
         #Prediction
-
-        if (region!="" and type!="" and model=="holtwinters"):
-            df_3_new=data.loc[data['region']==region]
-            df_3_new=df_3_new.loc[df_3_new['type']==type] 
-            df_3_new=df_3_new[['Date','AveragePrice']]
-            df_3_new.index=df_3_new['Date']
-            df_3_new=df_3_new[['AveragePrice']]
-            df_3_new.sort_index(inplace=True)
-            df_3_new.index=pd.to_datetime(df_3_new.index)
-            result2 = seasonal_decompose(df_3_new, model='multiplicative')
-            train3,test3=np.split(df_3_new,[int(0.7*len(df_3_new))])
-            model3 = ExponentialSmoothing(train3, seasonal='mul', 
-                                        seasonal_periods=52).fit()
-
-            @st.cache(suppress_st_warning=True)
-            def load_model7():    
-                return model3.predict(start=test3.index[0], 
-                                end=test3.index[-1])
-            pred3=load_model7()
-            mae3 = mean_absolute_error(test3,pred3)
-            rmse3=mean_squared_error(test3,pred3)
+          
+        df_4=data.loc[data['region']==region]
+        df_4=df_4.loc[df_4['type']==type]
+        df_4=df_4[['Date','AveragePrice']]
+        df_4.index=df_4['Date']
+        df_4=df_4[['AveragePrice']]   
+        df_4.sort_index(inplace=True)
+        df_4.index=pd.to_datetime(df_4.index)
+        df_4_new=df_4.reset_index()
+        df_4_new.columns=['ds','y']
+        result4 = seasonal_decompose(df_4, model='multiplicative')
+            # Train/Test Prophet
+        train4,test4=np.split(df_4_new,[int(0.7*len(df_4_new))])
+            # Build model
+        @st.cache(suppress_st_warning=True)
+        def load_model4():
+            model4=Prophet() 
+            model4.fit(train4)  
+            weeks4=pd.date_range('2017-04-09','2018-03-25',freq='W').strftime("%Y-%m-%d").tolist() # thời gian của test để so sánh yhat và ytest
+            future4=pd.DataFrame(weeks4)
+            future4.columns=['ds']
+            future4['ds']=pd.to_datetime(future4['ds']) 
+            return model4.predict(future4)
+        forecast4=load_model4()
+        df_4_new.y.mean()
+            # 51 weeks in test 
+        test4.y.mean()
+        y_test4=test4['y'].values
+        y_pred4=forecast4['yhat'].values[:51]
+        mae_p4=mean_absolute_error(y_test4,y_pred4)
+        rmse_p4=sqrt(mean_squared_error(y_test4,y_pred4))
+            # Long-term prediction for the next 1-5 years => Consider whether to expand cultivation/production, and trading
+        y_test_value4=pd.DataFrame(y_test4,index=pd.to_datetime(test4['ds']),columns=['Actual'])
+        y_pred_value4=pd.DataFrame(y_pred4,index=pd.to_datetime(test4['ds']),columns=['Prediction'])
             #predict for next 52 weeks (1 year)
-            import datetime
-            @st.cache(suppress_st_warning=True)
-            def load_model8():   
-                s = datetime.datetime(2018, 3, 25)
-                e = datetime.datetime(2019, 3,  24)
-                return model3  .predict(start= s, end=e)
-            x=load_model8()
-            pred_next_52_week3=x[1:]
-
-            next_52_week3=x.index[1:]
-            values_next_52_week3=x.values[1:]
-            #predict for next 260 weeks (5 years)
-            @st.cache(suppress_st_warning=True)
-            def load_model9():  
-                s2 = datetime.datetime(2018, 3, 25)
-                e2 = datetime.datetime(2023, 3,  19)
-                return model3.predict(start= s2, end=e2)
-            x2=load_model9()
-            pred_next_260_week4=x2[1:]
-            next_260_week4=x2.index[1:]
-            values_next_260_week4=x2.values[1:]
-            st.subheader("Overview "+type +" avocado in " +region )
-                
-            fig7,ax=plt.subplots(figsize=(8,8))
-            plt.plot(df_3_new)
-            plt.title("AveragePrice-"+type+"-"+region,color='red',fontsize=20)
-            plt.show();
-            st.pyplot(fig7)
-
-            
-            fig8,ax=plt.subplots(figsize=(9,3))
-            result2.seasonal.plot()
-            plt.show()
-            st.pyplot(fig8)
-
-            fig9,ax=plt.subplots(figsize=(9,3))
-            result2.trend.plot()
-            plt.show()
-            st.pyplot(fig9)
-
-            st.subheader("Mean of " +type+ " Avocado AveragePrice-"+ region+": " + str(round(df_3_new['AveragePrice'].mean(),2)) + " USD")
-            st.subheader("MAE: " + str(round(mae3,2)))
-            st.write("##### Visualization: AveragePrice vs AveragePrice Prediction from 04-2017 to 03-2018 (51 weeks)")
-            # Visulaize the result
-
-            fig10,ax=plt.subplots()
-            plt.plot(test3, label='AveragePrice')
-            plt.plot(pred3, label='Prediction')
-            plt.xticks(rotation='vertical') 
-            plt.legend()             
-            plt.show()
-            st.pyplot(fig10)
-
-            st.write("##### Next 52 weeks-1 year")
-            
-            fig11,ax=plt.subplots(figsize=(10,6))
-            plt.title("AveragePrice from 2015-01 to 2018-03 and next 52 weeks")
-            plt.plot(train3.index, train3, label='Train')
-            plt.plot(test3.index, test3, label='Test')
-            plt.plot(pred3.index, pred3, label='Predict')
-            plt.plot(x.index, x.values, label='Next-52-weeks')
-            plt.legend(loc='best')            
-            st.pyplot(fig11)
+        m5=Prophet()
+        m5.fit(df_4_new)
+        @st.cache(suppress_st_warning=True)
+        def load_model5():
+            future_14=m5.make_future_dataframe(periods=52,freq='W')
+            return m5.predict(future_14)
+        forecast_14=load_model5()
+        #predict for next 260 weeks (5 years)
+        @st.cache(suppress_st_warning=True)
+        def load_model6():
+            future_24=m5.make_future_dataframe(periods=260,freq='W')
+            return m5.predict(future_24)
+        forecast_24=load_model6()
+        st.subheader("Overview "+type +" avocado in " +region )
+        fig30,ax=plt.subplots(figsize=(8,8))
+        plt.plot(df_4)
+        plt.title("AveragePrice-"+type+"-"+region,color='red',fontsize=20)
+        plt.show();
+        st.pyplot(fig30)
 
 
-            st.write("##### Next 260 weeks-5 years")
-            fig12,ax=plt.subplots(figsize=(10,6))
-            plt.title("AveragePrice from 2015-01 to 2018-03 and next 260 weeks")
-            plt.plot(train3.index, train3, label='Train')
-            plt.plot(test3.index, test3, label='Test')
-            plt.plot(pred3.index, pred3, label='Predict')
-            plt.plot(x2.index, x2.values, label='Next-260-weeks')
-            plt.legend(loc='best')
-            st.pyplot(fig12)
-            
-        elif (region!="" and type!="" and model=="facebook prophet"):
-            df_4=data.loc[data['region']==region]
-            df_4=df_4.loc[df_4['type']==type]
-            df_4=df_4[['Date','AveragePrice']]
-            df_4.index=df_4['Date']
-            df_4=df_4[['AveragePrice']]   
-            df_4.sort_index(inplace=True)
-            df_4.index=pd.to_datetime(df_4.index)
-            df_4_new=df_4.reset_index()
-            df_4_new.columns=['ds','y']
-            result4 = seasonal_decompose(df_4, model='multiplicative')
-                # Train/Test Prophet
-            train4,test4=np.split(df_4_new,[int(0.7*len(df_4_new))])
-                # Build model
-            @st.cache(suppress_st_warning=True)
-            def load_model4():
-                model4=Prophet() 
-                model4.fit(train4)  
-                weeks4=pd.date_range('2017-04-09','2018-03-25',freq='W').strftime("%Y-%m-%d").tolist() # thời gian của test để so sánh yhat và ytest
-                future4=pd.DataFrame(weeks4)
-                future4.columns=['ds']
-                future4['ds']=pd.to_datetime(future4['ds']) 
-                return model4.predict(future4)
-            forecast4=load_model4()
-            df_4_new.y.mean()
-                # 51 weeks in test 
-            test4.y.mean()
-            y_test4=test4['y'].values
-            y_pred4=forecast4['yhat'].values[:51]
-            mae_p4=mean_absolute_error(y_test4,y_pred4)
-            rmse_p4=sqrt(mean_squared_error(y_test4,y_pred4))
-                # Long-term prediction for the next 1-5 years => Consider whether to expand cultivation/production, and trading
-            y_test_value4=pd.DataFrame(y_test4,index=pd.to_datetime(test4['ds']),columns=['Actual'])
-            y_pred_value4=pd.DataFrame(y_pred4,index=pd.to_datetime(test4['ds']),columns=['Prediction'])
-                #predict for next 52 weeks (1 year)
-            m5=Prophet()
-            m5.fit(df_4_new)
-            @st.cache(suppress_st_warning=True)
-            def load_model5():
-                future_14=m5.make_future_dataframe(periods=52,freq='W')
-                return m5.predict(future_14)
-            forecast_14=load_model5()
-            #predict for next 260 weeks (5 years)
-            @st.cache(suppress_st_warning=True)
-            def load_model6():
-                future_24=m5.make_future_dataframe(periods=260,freq='W')
-                return m5.predict(future_24)
-            forecast_24=load_model6()
-            st.subheader("Overview "+type +" avocado in " +region )
-            fig30,ax=plt.subplots(figsize=(8,8))
-            plt.plot(df_4)
-            plt.title("AveragePrice-"+type+"-"+region,color='red',fontsize=20)
-            plt.show();
-            st.pyplot(fig30)
+        fig31,ax=plt.subplots(figsize=(9,3))
+        result4.seasonal.plot()
+        plt.show()
+        st.pyplot(fig31)
 
-            
-            fig31,ax=plt.subplots(figsize=(9,3))
-            result4.seasonal.plot()
-            plt.show()
-            st.pyplot(fig31)
-
-            fig32,ax=plt.subplots(figsize=(9,3))
-            result4.trend.plot()
-            plt.show()
-            st.pyplot(fig32)
-            st.subheader("Mean of " +type+ " Avocado AveragePrice-"+ region+": "  + str(round(df_4_new['y'].mean(),2))+ "USD")
-            st.subheader("MAE: " + str(round(mae_p4,2)))
+        fig32,ax=plt.subplots(figsize=(9,3))
+        result4.trend.plot()
+        plt.show()
+        st.pyplot(fig32)
+        st.subheader("Mean of " +type+ " Avocado AveragePrice-"+ region+": "  + str(round(df_4_new['y'].mean(),2))+ "USD")
+        st.subheader("MAE: " + str(round(mae_p4,2)))
 
 
-            st.write("##### Next 52 weeks-1 year")         
-            # Next 1 years   
-            fig33=m.plot(forecast_14)
-            fig33.show()
-            a=add_changepoints_to_plot(fig33.gca(),m5,forecast_14)
-            st.pyplot(fig33)
+        st.write("##### Next 52 weeks-1 year")         
+        # Next 1 years   
+        fig33=m.plot(forecast_14)
+        fig33.show()
+        a=add_changepoints_to_plot(fig33.gca(),m5,forecast_14)
+        st.pyplot(fig33)
 
-            fig34, ax = plt.subplots()
-            plt.plot(df_4_new['y'],label='AveragePrice')
-            plt.plot(forecast_14['yhat'],label='Prediction',color='red')
-            plt.xticks(rotation='vertical')
-            plt.legend()
-            plt.show()
-            st.pyplot(fig34)
+        fig34, ax = plt.subplots()
+        plt.plot(df_4_new['y'],label='AveragePrice')
+        plt.plot(forecast_14['yhat'],label='Prediction',color='red')
+        plt.xticks(rotation='vertical')
+        plt.legend()
+        plt.show()
+        st.pyplot(fig34)
 
-            st.write("##### Next 260 weeks-5 years")
-            # Next 5 years   
-            fig35=m.plot(forecast_24)
-            fig35.show()
-            a=add_changepoints_to_plot(fig35.gca(),m5,forecast_24)
-            st.pyplot(fig35)
+        st.write("##### Next 260 weeks-5 years")
+        # Next 5 years   
+        fig35=m.plot(forecast_24)
+        fig35.show()
+        a=add_changepoints_to_plot(fig35.gca(),m5,forecast_24)
+        st.pyplot(fig35)
 
-            fig36, ax = plt.subplots()
-            plt.plot(df_4_new['y'],label='AveragePrice')
-            plt.plot(forecast_24['yhat'],label='Prediction',color='red')
-            plt.xticks(rotation='vertical')
-            plt.legend()
-            plt.show()
-            st.pyplot(fig36)
+        fig36, ax = plt.subplots()
+        plt.plot(df_4_new['y'],label='AveragePrice')
+        plt.plot(forecast_24['yhat'],label='Prediction',color='red')
+        plt.xticks(rotation='vertical')
+        plt.legend()
+        plt.show()
+        st.pyplot(fig36)
         
         if st.button("Clear history cache"):
             st.legacy_caching.clear_cache()
