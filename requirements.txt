@@ -6,11 +6,11 @@ matplotlib
 scipy
 seaborn
 sklearn
-xgboost
+#xgboost
 statsmodels
 wheel   ##==0.24.0##
 pystan ##==2.19.1.1####
 #fbprophet
-holidays
+#holidays
 pmdarima
 prophet
