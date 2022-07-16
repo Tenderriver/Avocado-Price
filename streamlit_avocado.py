@@ -165,7 +165,7 @@ if choice == 'Business Objective':
     * Part 1: Overview Dataset
     * Part 2: Organic Avocado Average Price Prediction in California 
     * Part 3: Conventional Avocado Average Price Prediction in California 
-    * Part 4: Create new prediction in your selected area
+    * Part 4: Create new prediction for your selected area
     """)
 
     col1, col2, col3 = st.columns([1,6,1])
