@@ -128,34 +128,46 @@ values_next_260_week4=x2.values[1:]
 
 # PART 4. New prediction for your selected area
 # Make new dataframe from original dataframe: data
+
+import base64
+
+# @st.cache(allow_output_mutation=True)
+def sidebar_bg(side_bg):
+
+   side_bg_ext = 'png'
+
+   st.markdown(
+      f"""
+      <style>
+      [data-testid="stSidebar"] > div:first-child {{
+          background: url(data:image/{side_bg_ext};base64,{base64.b64encode(open(side_bg, "rb").read()).decode()});
+      }}
+      </style>
+      """,
+      unsafe_allow_html=True,
+      )
 # GUI
+
+side_bg = 'image9.jpg'
+sidebar_bg(side_bg)
 menu = ["Business Objective", "Content"]
 choice = st.sidebar.selectbox('Menu', menu)
 if choice == 'Business Objective':    
     st.header("Business Objective")
     st.write("""
-    ##### Bơ “Hass”, một công ty có trụ sở tại Mexico, chuyên sản xuất nhiều loại quả bơ được bán ở Mỹ. Họ đã rất thành công trong những năm gần đây và muốn mở rộng. Vì vậy, họ muốn xây dựng mô hình hợp lý để dự đoán giá trung bình của bơ “Hass” ở Mỹ nhằm xem xét việc mở rộng các loại trang trại Bơ đang có cho việc trồng bơ ở các vùng khác.
-    """)  
-    st.write("""
-    ##### => Mục tiêu/ Vấn đề: Xây dựng mô hình dự đoán giá trung bình của bơ “Hass” ở Mỹ => xem xét việc mở rộng sản xuất, kinh doanh.
+    * Bơ “Hass”, một công ty có trụ sở tại Mexico, chuyên sản xuất nhiều loại quả bơ được bán ở Mỹ. Họ đã rất thành công trong những năm gần đây và muốn mở rộng. Vì vậy, họ muốn xây dựng mô hình hợp lý để dự đoán giá trung bình của bơ “Hass” ở Mỹ nhằm xem xét việc mở rộng các loại trang trại Bơ đang có cho việc trồng bơ ở các vùng khác.
+    
+    => Mục tiêu/ Vấn đề: Xây dựng mô hình dự đoán giá trung bình của bơ “Hass” ở Mỹ => xem xét việc mở rộng sản xuất, kinh doanh.
     """)
     st.image("image4.jpg")
     st.subheader("Content")
     st.write("""
-    #### Part 1: Overview Dataset
+    * Part 1: Overview Dataset
+    * Part 2: Organic Avocado Average Price Prediction in California 
+    * Part 3: Conventional Avocado Average Price Prediction in California 
+    * Part 4: Create new prediction in your selected area
     """)
-    st.write("""
-    #### Part 2: Organic Avocado Average Price Prediction in California 
-    """)
-    st.write("""
-    #### Part 3: Conventional Avocado Average Price Prediction in California 
-    """)
-    st.write("""
-    #### Part 4: Create new prediction in your selected area
-    """)
-    st.write("""
-     
-    """)
+
     col1, col2, col3 = st.columns([1,6,1])
      
     with col1:
@@ -166,13 +178,14 @@ if choice == 'Business Objective':
 
     with col3:
         st.write("")
-    
+    st.balloons()
+
 elif choice=="Content":
-    menu2 = ["Overview Dataset","Organic Avocado-California", "Conventional Avocado-California","New Prediction"]
+    menu2 = ["Overview Dataset","Organic Avocado - California", "Conventional Avocado - California","New Prediction"]
     choice = st.sidebar.selectbox('Menu of Content', menu2)
     if choice=="Overview Dataset": 
         st.header("Part 1. Overview Dataset")  
-        st.write(""" #### 1.1. Organic's Average Price more expensive than Conventional's. Average Price is effected by Type
+        st.write("""#### 1.1. Organic's Average Price more expensive than Conventional's. Average Price is effected by Type
         """)
         fig1, ax = plt.subplots(figsize=(20,8))
         sns.boxplot(data=data,x="type",y="AveragePrice")
@@ -205,7 +218,7 @@ elif choice=="Content":
         plt.show()
         st.pyplot(fig3) 
 
-    elif choice == 'Organic Avocado-California':            
+    elif choice == 'Organic Avocado - California':            
         menu3 = ["Overview","Build Project","Show Prediction"]
         choice = st.sidebar.selectbox('Menu of Organic Avocado - California', menu3)
         st.write("""### Part 2: Organic Avocado Average Price Prediction in California 
@@ -219,7 +232,7 @@ elif choice=="Content":
 
             fig5,ax=plt.subplots(figsize=(8,8))
             plt.plot(df_2)
-            plt.title("AveragePrice-Organic",color='red',fontsize=20)
+            plt.title("AveragePrice - Organic",color='red',fontsize=20)
             plt.show();
             st.pyplot(fig5)
 
@@ -234,19 +247,15 @@ elif choice=="Content":
             plt.show()
             st.pyplot(fig7)
 
-            st.write("### Organic avocado average price is seasonal and has a significant increasing trend, highest in September and lowest in March.")
-            st.write("### Results: ")
+            st.write("###### Organic avocado average price is seasonal and has a significant increasing trend, highest in September and lowest in March.")
+            st.write("##### Results: ")
             st.write("""
-            #### FaceBook Prophet : MAE- 0.151
-            """)
-            st.write(""" 
-            #### Arima            : MAE- 0.138
-            """)
-            st.write("""
-            #### Holtwinters      : MAE- 0.163
+            * FaceBook Prophet : MAE- 0.151
+            * Arima            : MAE- 0.138
+            * Holtwinters      : MAE- 0.163
             """)
         elif choice == 'Build Project':
-            st.subheader("Build Project - FaceBook Prophet")
+            st.write("#### Build Project - FaceBook Prophet")
             st.write("""
             ##### Some data:
             """)
@@ -257,13 +266,14 @@ elif choice=="Content":
             ##### Build model ...
             """)
             st.write("""
-            #### Calculate MAE between expected and predicted values
+            ###### Calculate MAE between expected and predicted values
             """)
-            st.write("MAE: " + str(round(mae_p,2)))
+            st.markdown("MAE: " + str(round(mae_p,2)))
             
-            st.write("""This result shows that Prophet's MAE are good enough to predict the organic avocado AveragePrice in California, MAE = 0.15 (about 10% of the AveragePrice), compared to the AveragePrice ~ 1.69.
-                """)
-            st.write("##### Visualization: AveragePrice vs AveragePrice Prediction from 04-2017 to 03-2018 (51 weeks)")
+            st.write("This result shows that Prophet's MAE are good enough to predict the organic avocado AveragePrice in California, MAE = 0.15 (about 10% of the AveragePrice), compared to the AveragePrice ~ 1.69.")
+            st.write('''
+            ##### Visualization: 
+            AveragePrice vs AveragePrice Prediction from 04-2017 to 03-2018 (51 weeks)''')
                 # Visulaize the result
             fig, ax = plt.subplots()   
             plt.plot(y_test_value,label='Real AveragePrice')
@@ -274,8 +284,8 @@ elif choice=="Content":
             st.pyplot(fig)  
 
         elif choice == 'Show Prediction':
-            st.subheader(" Prediction for the future in California - Organic Avocado - Facebook Prophet")
-            st.write("##### Next 52 weeks-1 year")
+            st.write("#### Prediction for the future in California - Organic Avocado - Facebook Prophet")
+            st.write("##### Next 52 weeks (1 year)")
    
                 # Next 1 years   
             fig1=m.plot(forecast_1)
@@ -291,7 +301,7 @@ elif choice=="Content":
             plt.show()
             st.pyplot(fig2)
     
-            st.write("##### Next 260 weeks-5 years")
+            st.write("##### Next 260 weeks (5 years)")
             # Next 5 years   
             fig3=m.plot(forecast_2)
             fig3.show()
@@ -305,23 +315,25 @@ elif choice=="Content":
             plt.legend()
             plt.show()
             st.pyplot(fig4)
-            st.write(""" ### Conclusion: The average price of organic avocado in California tends to increase in short-term (52 weeks-1year) and long-term(260 weeks-5years).Company should consider business expansion of organic avocado in California.
-                """)       
+            st.write(''' 
+            ##### Conclusion: 
+            The average price of organic avocado in California tends to increase in short-term (52 weeks - 1 year) and long-term(260 weeks - 5 years). Company should consider business expansion of organic avocado in California.
+                ''')       
 
-    elif choice == 'Conventional Avocado-California':
+    elif choice == 'Conventional Avocado - California':
         st.write("""
         ### Part 3: Conventional Avocado Average Price Prediction in California 
-        ##### HOLTWINTERS - Time Series Algorithm
         """)
         menu4 = ["Overview","Build Project","Show Prediction"]
         choice = st.sidebar.selectbox('Menu of Conventional Avocado - California', menu4)
         if choice=="Overview":
             st.write("""
             #### 2.1. Overview conventional avocado in California
+            ##### HOLTWINTERS - Time Series Algorithm
             """)
             fig7,ax=plt.subplots(figsize=(8,8))
             plt.plot(df_3_new)
-            plt.title("AveragePrice-Conventional",color='red',fontsize=20)
+            plt.title("AveragePrice - Conventional",color='red',fontsize=20)
             plt.show();
             st.pyplot(fig7)
 
@@ -336,19 +348,15 @@ elif choice=="Content":
             plt.show()
             st.pyplot(fig9)
 
-            st.write("### Conventional avocado average price is seasonal and has a significant increasing trend, highest in September and lowest in March.")
-            st.write("### Results: ")
+            st.write("###### Conventional avocado average price is seasonal and has a significant increasing trend, highest in September and lowest in March.")
+            st.write("##### Results: ")
             st.write("""
-            #### FaceBook Prophet : MAE- 0.170
-            """) 
-            st.write("""
-            #### Arima            : MAE- 0.184
-            """)
-            st.write("""
-            #### Holtwinters      : MAE- 0.152
+            * FaceBook Prophet : MAE- 0.170
+            * Arima            : MAE- 0.184
+            * Holtwinters      : MAE- 0.152
             """)
         elif choice == 'Build Project':
-            st.subheader("Build Project - Holtwinters")
+            st.write("#### Build Project - Holtwinters")
             st.write("""
             ##### Some data:
             """)
@@ -359,13 +367,15 @@ elif choice=="Content":
             ##### Build model ...
             """)
             st.write("""
-            #### Calculate MAE between expected and predicted values
+            ###### Calculate MAE between expected and predicted values
             """)
-            st.write("MAE: " + str(round(mae3,2)))
+            st.markdown("MAE: " + str(round(mae3,2)))
            
             st.write("""This result shows that MAE are good enough to predict the organic avocado AveragePrice in California, MAE = 0.15 (about 13% of the AveragePrice), compared to the AveragePrice ~ 1.1.
                 """)
-            st.write("##### Visualization: AveragePrice vs AveragePrice Prediction from 04-2017 to 03-2018 (51 weeks)")
+            st.write('''
+            ##### Visualization: 
+            AveragePrice vs AveragePrice Prediction from 04-2017 to 03-2018 (51 weeks)''')
                 # Visulaize the result
 
             fig10,ax=plt.subplots()
@@ -377,8 +387,8 @@ elif choice=="Content":
             st.pyplot(fig10)
 
         elif choice == 'Show Prediction':
-            st.subheader(" Prediction for the future in California - Conventional Avocado - Holtwinters")
-            st.write("##### Next 52 weeks-1 year")
+            st.write("#### Prediction for the future in California - Conventional Avocado - Holtwinters")
+            st.write("##### Next 52 weeks (1 year)")
    
             fig11,ax=plt.subplots(figsize=(10,6))
             plt.title("AveragePrice from 2015-01 to 2018-03 and next 52 weeks")
@@ -390,7 +400,7 @@ elif choice=="Content":
             st.pyplot(fig11)
 
             
-            st.write("##### Next 260 weeks-5 years")
+            st.write("##### Next 260 weeks (5 years)")
             fig12,ax=plt.subplots(figsize=(10,6))
             plt.title("AveragePrice from 2015-01 to 2018-03 and next 260 weeks")
             plt.plot(train3.index, train3, label='Train')
@@ -399,8 +409,10 @@ elif choice=="Content":
             plt.plot(x2.index, x2.values, label='Next-260-weeks')
             plt.legend(loc='best')
             st.pyplot(fig12)
-            st.write(""" ### Conclusion: The average price of convention avocado in California tends to not increase in short-term (52 weeks-1year) and long-term(260 weeks-5years).Company should not expand conventional avocado's business in California.
-                """)   
+            st.write(''' 
+            ##### Conclusion: 
+            The average price of convention avocado in California tends to not increase in short-term (52 weeks - 1 year) and long-term(260 weeks - 5 years). Company should not expand conventional avocado's business in California.
+                ''')   
 
     elif choice=="New Prediction":
         def region():
@@ -471,7 +483,7 @@ elif choice=="Content":
                 
             fig7,ax=plt.subplots(figsize=(8,8))
             plt.plot(df_3_new)
-            plt.title("AveragePrice-"+type+"-"+region,color='red',fontsize=20)
+            plt.title("AveragePrice - "+type+" - "+region,color='red',fontsize=20)
             plt.show();
             st.pyplot(fig7)
 
@@ -486,10 +498,11 @@ elif choice=="Content":
             plt.show()
             st.pyplot(fig9)
 
-            st.subheader("Mean of " +type+ " Avocado AveragePrice-"+ region+": " + str(round(df_3_new['AveragePrice'].mean(),2)) + " USD")
-            st.subheader("MAE: " + str(round(mae3,2)))
-            st.write("##### Visualization: AveragePrice vs AveragePrice Prediction from 04-2017 to 03-2018 (51 weeks)")
-            # Visulaize the result
+            st.write("###### Mean of " +type+ " Avocado AveragePrice - "+ region+": " + str(round(df_3_new['AveragePrice'].mean(),2)) + " USD")
+            st.write("###### MAE: " + str(round(mae3,2)))
+            st.write('''##### Visualization: 
+            AveragePrice vs AveragePrice Prediction from 04-2017 to 03-2018 (51 weeks)''')
+            # Visualize the result
 
             fig10,ax=plt.subplots()
             plt.plot(test3, label='AveragePrice')
@@ -499,25 +512,25 @@ elif choice=="Content":
             plt.show()
             st.pyplot(fig10)
 
-            st.write("##### Next 52 weeks-1 year")
+            st.write("##### Next 52 weeks (1 year)")
             
             fig11,ax=plt.subplots(figsize=(10,6))
             plt.title("AveragePrice from 2015-01 to 2018-03 and next 52 weeks")
             plt.plot(train3.index, train3, label='Train')
             plt.plot(test3.index, test3, label='Test')
             plt.plot(pred3.index, pred3, label='Predict')
-            plt.plot(x.index, x.values, label='Next-52-weeks')
+            plt.plot(x.index, x.values, label='Next - 52-weeks')
             plt.legend(loc='best')            
             st.pyplot(fig11)
 
 
-            st.write("##### Next 260 weeks-5 years")
+            st.write("##### Next 260 weeks (5 years)")
             fig12,ax=plt.subplots(figsize=(10,6))
             plt.title("AveragePrice from 2015-01 to 2018-03 and next 260 weeks")
             plt.plot(train3.index, train3, label='Train')
             plt.plot(test3.index, test3, label='Test')
             plt.plot(pred3.index, pred3, label='Predict')
-            plt.plot(x2.index, x2.values, label='Next-260-weeks')
+            plt.plot(x2.index, x2.values, label='Next - 260-weeks')
             plt.legend(loc='best')
             st.pyplot(fig12)
             
@@ -572,7 +585,7 @@ elif choice=="Content":
             st.subheader("Overview "+type +" avocado in " +region )
             fig30,ax=plt.subplots(figsize=(8,8))
             plt.plot(df_4)
-            plt.title("AveragePrice-"+type+"-"+region,color='red',fontsize=20)
+            plt.title("AveragePrice - "+type+" - "+region,color='red',fontsize=20)
             plt.show();
             st.pyplot(fig30)
 
@@ -586,11 +599,11 @@ elif choice=="Content":
             result4.trend.plot()
             plt.show()
             st.pyplot(fig32)
-            st.subheader("Mean of " +type+ " Avocado AveragePrice-"+ region+": "  + str(round(df_4_new['y'].mean(),2))+ "USD")
-            st.subheader("MAE: " + str(round(mae_p4,2)))
+            st.write("###### Mean of " +type+ " Avocado AveragePrice - "+ region+": "  + str(round(df_4_new['y'].mean(),2))+ "USD")
+            st.write("###### MAE: " + str(round(mae_p4,2)))
 
 
-            st.write("##### Next 52 weeks-1 year")         
+            st.write("##### Next 52 weeks (1 year)")         
             # Next 1 years   
             fig33=m.plot(forecast_14)
             fig33.show()
@@ -605,7 +618,7 @@ elif choice=="Content":
             plt.show()
             st.pyplot(fig34)
 
-            st.write("##### Next 260 weeks-5 years")
+            st.write("##### Next 260 weeks (5 years)")
             # Next 5 years   
             fig35=m.plot(forecast_24)
             fig35.show()
@@ -623,5 +636,4 @@ elif choice=="Content":
         if st.button("Clear history cache"):
             st.legacy_caching.clear_cache()
 
-        if st.button("Submit"):
-            st.legacy_caching.clear_cache()
+       
